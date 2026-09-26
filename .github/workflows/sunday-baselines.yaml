@@ -25,7 +25,7 @@ jobs:
           NEXT_PUBLIC_API_URL: http://127.0.0.1:3001
           NEXT_PUBLIC_APP_VERSION: dev
       - name: Capture all four Sunday variants
-        run: npx playwright test --config=playwright.baselines.config.ts e2e/visual.spec.ts -g '^screen /sunday-rest$' --update-snapshots
+        run: npx playwright test --config=playwright.baselines.config.ts e2e/visual.spec.ts -g 'screen /sunday-rest' --update-snapshots
         env:
           CI: '1'
           HOSTNAME: 0.0.0.0
