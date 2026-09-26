@@ -1,0 +1,38 @@
+name: Generate Sunday visual baselines
+on:
+  push:
+    branches: [sunday-rest-baselines-20260926]
+permissions:
+  contents: read
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    container:
+      image: mcr.microsoft.com/playwright:v1.61.1-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci
+      - name: Prepare existing handbook images and catalog
+        run: |
+          node scripts/sync-handbook-images.mjs 2> /tmp/missing-baselines.log && exit 1
+          cat /tmp/missing-baselines.log
+          if grep '^  - ' /tmp/missing-baselines.log | grep -v 'screen-sunday-rest-'; then exit 1; fi
+      - name: Build for initial baseline capture
+        run: npm run build --ignore-scripts
+        env:
+          NEXT_PUBLIC_API_URL: http://127.0.0.1:3001
+          NEXT_PUBLIC_APP_VERSION: dev
+      - name: Capture all four Sunday variants
+        run: npx playwright test --config=playwright.baselines.config.ts e2e/visual.spec.ts -g '^screen /sunday-rest$' --update-snapshots
+        env:
+          CI: '1'
+          HOSTNAME: 0.0.0.0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sunday-linux-baselines
+          path: |
+            e2e/visual.spec.ts-snapshots/screen-sunday-rest-*-linux.png
+            test-results/
