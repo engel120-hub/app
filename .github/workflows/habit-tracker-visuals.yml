@@ -1,0 +1,37 @@
+name: Habit tracker visual references
+on:
+  push:
+    branches: [codex/habit-tracker-review-visuals]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  references:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    container:
+      image: mcr.microsoft.com/playwright:v1.61.1-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci
+      - name: Bootstrap visual references
+        run: |
+          cat > playwright.habit-bootstrap.config.ts <<'EOF'
+          import base from './playwright.config';
+          export default { ...base, webServer: [
+            { command: 'node e2e/mock-api.mjs', url: 'http://127.0.0.1:3001/healthz', timeout: 60000 },
+            { command: 'npx next build && npm run start:standalone', url: 'http://localhost:3000/healthz', timeout: 360000,
+              env: { ...process.env, HOSTNAME: '0.0.0.0', NEXT_PUBLIC_API_URL: 'http://127.0.0.1:3001', NEXT_PUBLIC_APP_VERSION: 'dev', NEXT_PUBLIC_E2E_NOW: '2026-01-07T12:00:00.000Z' } }
+          ] };
+          EOF
+          npx playwright test e2e/visual.spec.ts --grep "habit-tracker" --update-snapshots --config=playwright.habit-bootstrap.config.ts --project=desktop-light --project=desktop-dark --project=mobile-light --project=mobile-dark
+      - name: Tracker behavior
+        run: npx playwright test e2e/habit-tracker.spec.ts --config=playwright.habit-bootstrap.config.ts --project=chromium
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: habit-tracker-final-linux-references
+          path: |
+            e2e/visual.spec.ts-snapshots/*habit-tracker*linux.png
+            test-results/
