@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 50575acc860a83a2fa67f3a9ab405c2be562240a
+          ref: 145d9d242e5b7f9e170edfdd1961dd6a6c410c53
       - run: npm ci
       - name: Generate real Linux Chromium habit baselines
         run: |
@@ -31,7 +31,7 @@ jobs:
               env: { ...process.env, HOSTNAME: '0.0.0.0', NEXT_PUBLIC_API_URL: 'http://127.0.0.1:3001', NEXT_PUBLIC_APP_VERSION: 'dev', NEXT_PUBLIC_E2E_NOW: '2026-01-07T12:00:00.000Z' } }
           ] };
           EOF
-          npx playwright test e2e/visual.spec.ts --grep "habit-tracker" --update-snapshots --config=playwright.habit-bootstrap.config.ts --project=${{ matrix.project }} --workers=2
+          npx playwright test e2e/visual.spec.ts e2e/habits.spec.ts e2e/habit-reminder.spec.ts e2e/functions.spec.ts --grep "[Hh]abit" --update-snapshots --config=playwright.habit-bootstrap.config.ts --project=${{ matrix.project }} ${{ matrix.project == 'desktop-light' && '--project=chromium' || '' }} --workers=2
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -45,7 +45,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 50575acc860a83a2fa67f3a9ab405c2be562240a
+          ref: 145d9d242e5b7f9e170edfdd1961dd6a6c410c53
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
