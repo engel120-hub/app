@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 5163071a8a6f25c525c4f6625d1331852d64bdf4
+          ref: a643e2528ad2706447ff063090d3b92374004480
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
@@ -25,7 +25,7 @@ jobs:
       - name: Measure A38 policy on exact PR head
         run: |
           agent a38 run --repo . --repository 21gifts/app --policy .github/a38.json --base-sha b96d62bcb20790108adbc91b47e0c6c9828cf980 --output ${{ runner.temp }}/habit-a38/report.md --logs-dir ${{ runner.temp }}/habit-a38/logs --public
-          agent a38 verify --policy .github/a38.json --file ${{ runner.temp }}/habit-a38/report.md --repo 21gifts/app --head 5163071a8a6f25c525c4f6625d1331852d64bdf4 --public
+          agent a38 verify --policy .github/a38.json --file ${{ runner.temp }}/habit-a38/report.md --repo 21gifts/app --head a643e2528ad2706447ff063090d3b92374004480 --public
       - uses: actions/upload-artifact@v4
         if: always()
         with:
