@@ -6,46 +6,13 @@ on:
 permissions:
   contents: read
 jobs:
-  references:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    strategy:
-      fail-fast: false
-      matrix:
-        project: [desktop-light, desktop-dark, mobile-light, mobile-dark]
-    container:
-      image: mcr.microsoft.com/playwright:v1.61.1-noble
-      options: --ipc=host
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: 145d9d242e5b7f9e170edfdd1961dd6a6c410c53
-      - run: npm ci
-      - name: Generate real Linux Chromium habit baselines
-        run: |
-          cat > playwright.habit-bootstrap.config.ts <<'EOF'
-          import base from './playwright.config';
-          export default { ...base, webServer: [
-            { command: 'node e2e/mock-api.mjs', url: 'http://127.0.0.1:3001/healthz', timeout: 60000 },
-            { command: 'npx next build && npm run start:standalone', url: 'http://localhost:3000/healthz', timeout: 360000,
-              env: { ...process.env, HOSTNAME: '0.0.0.0', NEXT_PUBLIC_API_URL: 'http://127.0.0.1:3001', NEXT_PUBLIC_APP_VERSION: 'dev', NEXT_PUBLIC_E2E_NOW: '2026-01-07T12:00:00.000Z' } }
-          ] };
-          EOF
-          npx playwright test e2e/visual.spec.ts e2e/habits.spec.ts e2e/habit-reminder.spec.ts e2e/functions.spec.ts --grep "[Hh]abit" --update-snapshots --config=playwright.habit-bootstrap.config.ts --project=${{ matrix.project }} ${{ matrix.project == 'desktop-light' && '--project=chromium' || '' }} --workers=2
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: habit-catch-up-${{ matrix.project }}
-          path: |
-            e2e/visual.spec.ts-snapshots/*habit-tracker*${{ matrix.project }}-linux.png
-            test-results/
   a38:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 145d9d242e5b7f9e170edfdd1961dd6a6c410c53
+          ref: 5163071a8a6f25c525c4f6625d1331852d64bdf4
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
@@ -56,7 +23,9 @@ jobs:
       - name: Install pinned A38 tooling
         run: pip install git+https://github.com/DFXswiss/agent.git@e63980625f5b778c5a93104b0bf5de7fb5e379a8
       - name: Measure A38 policy on exact PR head
-        run: agent a38 run --repo . --repository 21gifts/app --policy .github/a38.json --base-sha b96d62bcb20790108adbc91b47e0c6c9828cf980 --output ${{ runner.temp }}/habit-a38/report.md --logs-dir ${{ runner.temp }}/habit-a38/logs --public
+        run: |
+          agent a38 run --repo . --repository 21gifts/app --policy .github/a38.json --base-sha b96d62bcb20790108adbc91b47e0c6c9828cf980 --output ${{ runner.temp }}/habit-a38/report.md --logs-dir ${{ runner.temp }}/habit-a38/logs --public
+          agent a38 verify --policy .github/a38.json --file ${{ runner.temp }}/habit-a38/report.md --repo 21gifts/app --head 5163071a8a6f25c525c4f6625d1331852d64bdf4 --public
       - uses: actions/upload-artifact@v4
         if: always()
         with:
