@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: fe50a5c3685ac28792d55a50806b203039ee8295
+          ref: de99959bc919a2666fc6e38034a84c8bf91d0285
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
@@ -26,7 +26,7 @@ jobs:
         run: |
           git show b96d62bcb20790108adbc91b47e0c6c9828cf980:.github/a38.json > ${{ runner.temp }}/habit-policy.json
           agent a38 run --repo . --repository 21gifts/app --policy ${{ runner.temp }}/habit-policy.json --base-sha b96d62bcb20790108adbc91b47e0c6c9828cf980 --output ${{ runner.temp }}/habit-a38/report.md --logs-dir ${{ runner.temp }}/habit-a38/logs --public
-          agent a38 verify --policy ${{ runner.temp }}/habit-policy.json --file ${{ runner.temp }}/habit-a38/report.md --repo 21gifts/app --head fe50a5c3685ac28792d55a50806b203039ee8295 --public
+          agent a38 verify --policy ${{ runner.temp }}/habit-policy.json --file ${{ runner.temp }}/habit-a38/report.md --repo 21gifts/app --head de99959bc919a2666fc6e38034a84c8bf91d0285 --public
       - name: Print verified report for publication
         run: cat '${{ runner.temp }}/habit-a38/report.md'
       - uses: actions/upload-artifact@v4
